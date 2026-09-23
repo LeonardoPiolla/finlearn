@@ -113,7 +113,11 @@ fun LessonScreen(
                     .background(backgroundColor)
                     .border(2.dp, borderColor, RoundedCornerShape(14.dp))
                     .clickable {
-                        if (answerState == null) selectedOption = index
+                        // Correção 1: Permite trocar a opção após errar e limpa o aviso
+                        if (answerState != "correct") {
+                            selectedOption = index
+                            answerState = null
+                        }
                     }
                     .padding(16.dp)
             ) {
@@ -177,7 +181,11 @@ fun LessonScreen(
         Button(
             onClick = {
                 if (answerState == "correct") {
-                    onFinishLesson(15) // Ganha 15 XP
+                    onFinishLesson(15)
+                } else if (answerState == "wrong") {
+                    // Correção 2: Botão "Tentar Novamente" limpa o estado
+                    answerState = null
+                    selectedOption = null
                 } else if (selectedOption != null) {
                     if (selectedOption == correctAnswerIndex) {
                         answerState = "correct"
@@ -186,7 +194,7 @@ fun LessonScreen(
                     }
                 }
             },
-            enabled = selectedOption != null,
+            enabled = selectedOption != null || answerState == "wrong",
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (answerState == "correct") CorrectGreen else PrimaryBlue
             ),
@@ -195,8 +203,13 @@ fun LessonScreen(
                 .fillMaxWidth()
                 .height(54.dp)
         ) {
+            val buttonText = when (answerState) {
+                "correct" -> "CONTINUAR"
+                "wrong" -> "TENTAR NOVAMENTE"
+                else -> "VERIFICAR"
+            }
             Text(
-                text = if (answerState == "correct") "CONTINUAR" else "VERIFICAR",
+                text = buttonText,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
