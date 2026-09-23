@@ -26,12 +26,11 @@ fun LessonScreen(
     var selectedOption by remember { mutableStateOf<Int?>(null) }
     var answerState by remember { mutableStateOf<String?>(null) }
     
-    // Estados para a IA
     var isThinking by remember { mutableStateOf(false) }
     var aiFeedback by remember { mutableStateOf("") }
 
     val options = listOf("R$ 22,00", "R$ 18,00", "R$ 10,00", "R$ 28,00")
-    val correctAnswerIndex = 1 // R$ 18,00
+    val correctAnswerIndex = 1 
     val questionText = "A Dolce Momento vende uma caixa de mini caseirinhos por R$ 28,00. O custo variável (ingredientes e embalagem) é de R$ 10,00 por caixa. Qual é a Margem de Contribuição unitária?"
 
     Column(
@@ -109,7 +108,6 @@ fun LessonScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Feedback da IA
         if (isThinking) {
             CircularProgressIndicator(color = PrimaryBlue, modifier = Modifier.padding(16.dp))
         } else if (answerState == "correct") {
@@ -128,7 +126,8 @@ fun LessonScreen(
                 shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(text = "🤖 Professor IA diz:", fontWeight = FontWeight.Bold, color = Color(0xFFFF4B4B), fontSize = 15.sp)
+                    // Nome alterado aqui
+                    Text(text = "🤖 Profº Finâncio diz:", fontWeight = FontWeight.Bold, color = Color(0xFFFF4B4B), fontSize = 15.sp)
                     Text(text = aiFeedback, color = TextDark, fontSize = 14.sp)
                 }
             }
@@ -167,7 +166,7 @@ fun LessonScreen(
                 text = when (answerState) {
                     "correct" -> "CONTINUAR"
                     "wrong" -> "TENTAR NOVAMENTE"
-                    else -> if (isThinking) "PENSANDO..." else "VERIFICAR"
+                    else -> if (isThinking) "A PENSAR..." else "VERIFICAR"
                 },
                 fontWeight = FontWeight.Bold, fontSize = 16.sp
             )
