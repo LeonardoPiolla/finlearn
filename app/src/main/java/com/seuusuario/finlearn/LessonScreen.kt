@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import com.seuusuario.finlearn.ui.theme.*
 
 @Composable
@@ -21,16 +22,17 @@ fun LessonScreen(
     onFinishLesson: (xpGained: Int) -> Unit,
     onBack: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     var selectedOption by remember { mutableStateOf<Int?>(null) }
     var answerState by remember { mutableStateOf<String?>(null) }
+    
+    // Estados para a IA
+    var isThinking by remember { mutableStateOf(false) }
+    var aiFeedback by remember { mutableStateOf("") }
 
-    val options = listOf(
-        "R$ 22,00",
-        "R$ 18,00",
-        "R$ 10,00",
-        "R$ 28,00"
-    )
+    val options = listOf("R$ 22,00", "R$ 18,00", "R$ 10,00", "R$ 28,00")
     val correctAnswerIndex = 1 // R$ 18,00
+    val questionText = "A Dolce Momento vende uma caixa de mini caseirinhos por R$ 28,00. O custo variável (ingredientes e embalagem) é de R$ 10,00 por caixa. Qual é a Margem de Contribuição unitária?"
 
     Column(
         modifier = Modifier
@@ -44,23 +46,14 @@ fun LessonScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "✕",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextDark,
-                modifier = Modifier
-                    .clickable { onBack() }
-                    .padding(8.dp)
+                text = "✕", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark,
+                modifier = Modifier.clickable { onBack() }.padding(8.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             LinearProgressIndicator(
                 progress = 0.5f,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp)),
-                color = CorrectGreen,
-                trackColor = Color(0xFFE5E5E5)
+                modifier = Modifier.weight(1f).height(12.dp).clip(RoundedCornerShape(6.dp)),
+                color = CorrectGreen, trackColor = Color(0xFFE5E5E5)
             )
         }
 
@@ -72,18 +65,11 @@ fun LessonScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "💡 Fundamentos Financeiros",
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryBlue,
-                    fontSize = 14.sp
-                )
+                Text(text = "💡 Fundamentos Financeiros", fontWeight = FontWeight.Bold, color = PrimaryBlue, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Margem de Contribuição é o valor que sobra da receita após deduzir os custos e despesas variáveis. É essa margem que ajuda a pagar os custos fixos e gerar lucro.",
-                    color = TextDark,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
+                    text = "Margem de Contribuição é o valor que sobra da receita após deduzir os custos e despesas variáveis.",
+                    color = TextDark, fontSize = 14.sp, lineHeight = 20.sp
                 )
             }
         }
@@ -91,10 +77,7 @@ fun LessonScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Caso Prático: A Dolce Momento vende uma caixa de mini caseirinhos por R$ 28,00. O custo variável (ingredientes como chocolate, farinha e a embalagem) é de R$ 10,00 por caixa. Qual é a Margem de Contribuição unitária?",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextDark,
+            text = questionText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TextDark,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -113,67 +96,40 @@ fun LessonScreen(
                     .background(backgroundColor)
                     .border(2.dp, borderColor, RoundedCornerShape(14.dp))
                     .clickable {
-                        // Correção 1: Permite trocar a opção após errar e limpa o aviso
-                        if (answerState != "correct") {
+                        if (answerState != "correct" && !isThinking) {
                             selectedOption = index
                             answerState = null
                         }
                     }
                     .padding(16.dp)
             ) {
-                Text(
-                    text = text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextDark
-                )
+                Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = TextDark)
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        if (answerState == "correct") {
+        // Feedback da IA
+        if (isThinking) {
+            CircularProgressIndicator(color = PrimaryBlue, modifier = Modifier.padding(16.dp))
+        } else if (answerState == "correct") {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF8D8)),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "🎉 Excelente raciocínio!",
-                        fontWeight = FontWeight.Bold,
-                        color = CorrectGreen,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = "R$ 28 (Receita) - R$ 10 (Custo Variável) = R$ 18 de Margem de Contribuição.",
-                        color = TextDark,
-                        fontSize = 13.sp
-                    )
+                    Text(text = "🎉 Excelente raciocínio!", fontWeight = FontWeight.Bold, color = CorrectGreen, fontSize = 16.sp)
+                    Text(text = "R$ 28 (Receita) - R$ 10 (Custo) = R$ 18.", color = TextDark, fontSize = 13.sp)
                 }
             }
-        } else if (answerState == "wrong") {
+        } else if (answerState == "wrong" && aiFeedback.isNotEmpty()) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEAEA)),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "👨‍🏫 Professor Financeiro:",
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFF4B4B),
-                        fontSize = 15.sp
-                    )
-                    Text(
-                        text = "Lembre-se da lógica: você deve subtrair os R$ 10,00 de custo variável do valor total de venda (R$ 28,00). Tente novamente!",
-                        color = TextDark,
-                        fontSize = 13.sp
-                    )
+                    Text(text = "🤖 Professor IA diz:", fontWeight = FontWeight.Bold, color = Color(0xFFFF4B4B), fontSize = 15.sp)
+                    Text(text = aiFeedback, color = TextDark, fontSize = 14.sp)
                 }
             }
         }
@@ -183,35 +139,37 @@ fun LessonScreen(
                 if (answerState == "correct") {
                     onFinishLesson(15)
                 } else if (answerState == "wrong") {
-                    // Correção 2: Botão "Tentar Novamente" limpa o estado
                     answerState = null
                     selectedOption = null
+                    aiFeedback = ""
                 } else if (selectedOption != null) {
                     if (selectedOption == correctAnswerIndex) {
                         answerState = "correct"
                     } else {
-                        answerState = "wrong"
+                        isThinking = true
+                        coroutineScope.launch {
+                            val wrongAnswer = options[selectedOption!!]
+                            aiFeedback = ProfessorIA.obterDica(questionText, wrongAnswer)
+                            answerState = "wrong"
+                            isThinking = false
+                        }
                     }
                 }
             },
-            enabled = selectedOption != null || answerState == "wrong",
+            enabled = (selectedOption != null || answerState == "wrong") && !isThinking,
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (answerState == "correct") CorrectGreen else PrimaryBlue
             ),
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp)
+            modifier = Modifier.fillMaxWidth().height(54.dp)
         ) {
-            val buttonText = when (answerState) {
-                "correct" -> "CONTINUAR"
-                "wrong" -> "TENTAR NOVAMENTE"
-                else -> "VERIFICAR"
-            }
             Text(
-                text = buttonText,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                text = when (answerState) {
+                    "correct" -> "CONTINUAR"
+                    "wrong" -> "TENTAR NOVAMENTE"
+                    else -> if (isThinking) "PENSANDO..." else "VERIFICAR"
+                },
+                fontWeight = FontWeight.Bold, fontSize = 16.sp
             )
         }
     }
