@@ -28,6 +28,9 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
     
-    // Biblioteca oficial para armazenamento local offline
+    // Banco de Dados Local
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // SDK Oficial do Google Gemini IA
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
