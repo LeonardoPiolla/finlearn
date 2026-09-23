@@ -18,8 +18,12 @@ jobs:
           gradle-version: '8.2'
       - name: Compilar APK
         run: gradle assembleDebug
+      - name: Separar APK
+        run: |
+          mkdir -p pasta-do-app
+          find . -name "*.apk" -exec cp {} pasta-do-app/ \;
       - name: Salvar APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: FinLearn-App
-          path: "**/*.apk"
+          path: pasta-do-app/
