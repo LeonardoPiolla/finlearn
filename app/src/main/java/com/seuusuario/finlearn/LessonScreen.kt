@@ -22,15 +22,15 @@ fun LessonScreen(
     onBack: () -> Unit
 ) {
     var selectedOption by remember { mutableStateOf<Int?>(null) }
-    var answerState by remember { mutableStateOf<String?>(null) } // "correct", "wrong" ou null
+    var answerState by remember { mutableStateOf<String?>(null) }
 
     val options = listOf(
-        "R$ 70,00",
-        "R$ 30,00",
-        "R$ 20,00",
-        "R$ 50,00"
+        "R$ 22,00",
+        "R$ 18,00",
+        "R$ 10,00",
+        "R$ 28,00"
     )
-    val correctAnswerIndex = 1 // R$ 30,00
+    val correctAnswerIndex = 1 // R$ 18,00
 
     Column(
         modifier = Modifier
@@ -39,7 +39,6 @@ fun LessonScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Barra superior com botão voltar e progresso
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -67,7 +66,6 @@ fun LessonScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Pílula Teórica
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7)),
             shape = RoundedCornerShape(16.dp),
@@ -82,7 +80,7 @@ fun LessonScreen(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Margem de Contribuição é o valor que sobra da receita após deduzir os custos e despesas variáveis. É essa margem que ajuda o negócio a pagar seus custos fixos e gerar lucro.",
+                    text = "Margem de Contribuição é o valor que sobra da receita após deduzir os custos e despesas variáveis. É essa margem que ajuda a pagar os custos fixos e gerar lucro.",
                     color = TextDark,
                     fontSize = 14.sp,
                     lineHeight = 20.sp
@@ -92,9 +90,8 @@ fun LessonScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Caso Prático / Pergunta
         Text(
-            text = "Caso Prático: Uma confeitaria vende uma caixa de brigadeiros por R$ 50,00. O custo variável (ingredientes e embalagem) é de R$ 20,00 por caixa. Qual é a Margem de Contribuição unitária?",
+            text = "Caso Prático: A Dolce Momento vende uma caixa de mini caseirinhos por R$ 28,00. O custo variável (ingredientes como chocolate, farinha e a embalagem) é de R$ 10,00 por caixa. Qual é a Margem de Contribuição unitária?",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextDark,
@@ -103,7 +100,6 @@ fun LessonScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Opções de Resposta
         options.forEachIndexed { index, text ->
             val isSelected = selectedOption == index
             val borderColor = if (isSelected) PrimaryBlue else Color(0xFFE5E5E5)
@@ -132,7 +128,6 @@ fun LessonScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Card de Feedback Pedagógico (Professor IA)
         if (answerState == "correct") {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF8D8)),
@@ -149,7 +144,7 @@ fun LessonScreen(
                         fontSize = 16.sp
                     )
                     Text(
-                        text = "R$ 50 (Receita) - R$ 20 (Custo Variável) = R$ 30 de Margem de Contribuição.",
+                        text = "R$ 28 (Receita) - R$ 10 (Custo Variável) = R$ 18 de Margem de Contribuição.",
                         color = TextDark,
                         fontSize = 13.sp
                     )
@@ -171,7 +166,7 @@ fun LessonScreen(
                         fontSize = 15.sp
                     )
                     Text(
-                        text = "Lembre-se da lógica: a margem é o que sobra da receita depois de subtrair o custo. Você deve subtrair os R$ 20,00 do valor total de venda (R$ 50,00). Tente novamente!",
+                        text = "Lembre-se da lógica: você deve subtrair os R$ 10,00 de custo variável do valor total de venda (R$ 28,00). Tente novamente!",
                         color = TextDark,
                         fontSize = 13.sp
                     )
@@ -179,7 +174,6 @@ fun LessonScreen(
             }
         }
 
-        // Botão de Ação Inferior
         Button(
             onClick = {
                 if (answerState == "correct") {
