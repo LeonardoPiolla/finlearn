@@ -7,8 +7,8 @@ import kotlinx.coroutines.withContext
 
 object ProfessorIA {
     
-    // IMPORTANTE: Para o MVP, a chave fica aqui. No futuro, ela irá para o servidor.
-    private const val API_KEY = "COLE_SUA_CHAVE_AQUI"
+    // Agora a chave vem da variável segura invisível
+    private val API_KEY = BuildConfig.GEMINI_API_KEY
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
