@@ -11,8 +11,14 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        
+        // Puxa a chave do cofre e cria uma variável segura para o aplicativo
+        buildConfigField("String", "GEMINI_API_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\"")
     }
-    buildFeatures { compose = true }
+    buildFeatures { 
+        compose = true
+        buildConfig = true // Habilita a leitura do cofre
+    }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.4" }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -27,10 +33,6 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
-    
-    // Banco de Dados Local
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    
-    // SDK Oficial do Google Gemini IA
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
