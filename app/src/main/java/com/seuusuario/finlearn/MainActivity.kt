@@ -4,14 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
+            val progressManager = remember { ProgressManager(context) }
+            val coroutineScope = rememberCoroutineScope()
+
+            // Escuta o banco de dados. Se o app fechar e abrir, os dados retornam daqui.
+            val totalXp by progressManager.totalXpFlow.collectAsState(initial = 0)
+            val streakDays by progressManager.streakDaysFlow.collectAsState(initial = 1)
+
             var currentScreen by remember { mutableStateOf("home") }
-            var totalXp by remember { mutableStateOf(0) }
-            var streakDays by remember { mutableStateOf(1) }
 
             when (currentScreen) {
                 "home" -> HomeTrailScreen(
@@ -21,8 +29,10 @@ class MainActivity : ComponentActivity() {
                 )
                 "lesson" -> LessonScreen(
                     onFinishLesson = { xpGained ->
-                        totalXp += xpGained
-                        currentScreen = "home"
+                        coroutineScope.launch {
+                            progressManager.addXp(xpGained) // Salva na memória interna
+                            currentScreen = "home"
+                        }
                     },
                     onBack = { currentScreen = "home" }
                 )
