@@ -20,11 +20,19 @@ object ProfessorIA {
     suspend fun obterDica(pergunta: String, respostaErrada: String): String {
         return withContext(Dispatchers.IO) {
             try {
+                // Verificação de segurança 1: A chave chegou vazia?
+                if (API_KEY.isBlank()) {
+                    return@withContext "ERRO 01: O GitHub Secrets não injetou a chave no aplicativo."
+                }
+
                 val prompt = "O aluno está a tentar resolver a seguinte questão:\n'$pergunta'\nEle escolheu a resposta '$respostaErrada', que está incorreta. Dê uma dica socrática curta que o faça perceber o erro de raciocínio, sem revelar a resposta certa."
                 val response = generativeModel.generateContent(prompt)
+                
                 response.text ?: "Lembre-se da lógica da fórmula e tente novamente!"
+                
             } catch (e: Exception) {
-                "Ops, estou com instabilidade na ligação. Reveja o conceito e tente novamente!"
+                // Verificação de segurança 2: Exibe na tela a exata mensagem de erro do Google ou do Sistema
+                "ERRO TÉCNICO: ${e.message}"
             }
         }
     }
